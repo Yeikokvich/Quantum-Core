@@ -1,4 +1,9 @@
 from models import transaccion_model
+import re
+
+
+def codigo_valido(codigo):
+    return bool(re.fullmatch(r"T\d{3,}", codigo))
 
 
 def listar_transacciones():
@@ -15,8 +20,14 @@ def obtener_transaccion(id):
 
 def crear_transaccion(datos):
     try:
+        codigo = datos.get("codigo", "")
+
+        if not codigo_valido(codigo):
+            return {"error": "El codigo debe tener el formato T seguido de al menos 3 numeros"}, 400
+
         if datos.get("monto", 0) < 0:
             return {"error": "El monto no puede ser negativo"}, 400
+
         nueva = transaccion_model.crear(datos)
         return nueva.dict(), 201
     except Exception as e:
