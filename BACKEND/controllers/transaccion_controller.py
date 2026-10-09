@@ -18,18 +18,30 @@ def obtener_transaccion(id):
     return transaccion.dict(), 200
 
 
-def crear_transaccion(datos):
+def crear_transaccion(datos): 
     try:
         codigo = datos.get("codigo", "")
 
+        # Validar formato del código: T + mínimo 3 números
         if not codigo_valido(codigo):
-            return {"error": "El codigo debe tener el formato T seguido de al menos 3 numeros"}, 400
+            return {
+                "error": "El codigo debe tener el formato T seguido de al menos 3 numeros"
+            }, 400
 
-        if datos.get("monto", 0) < 0:
+        # Obtener y validar el monto
+        monto = datos.get("monto", 0)
+
+        if monto < 0:
             return {"error": "El monto no puede ser negativo"}, 400
 
+        # Calcular automáticamente el impacto como el 1% del monto
+        datos["impacto"] = monto * 0.01
+
+        # Guardar la transacción mediante el modelo
         nueva = transaccion_model.crear(datos)
+
         return nueva.dict(), 201
+
     except Exception as e:
         return {"error": str(e)}, 400
 
